@@ -3,9 +3,11 @@
 class LogDB
 {
 	private $db;
+	private $file_cache;
 
 	function __construct($cfg)
 	{
+		$this->file_cache = array();
 		$this->db = new mysqli($cfg['database.host'], $cfg['database.username'], $cfg['database.password'], $cfg['database.database'], 3306);
 	}
 
@@ -38,6 +40,11 @@ class LogDB
 
 	function getFile($path)
 	{
+		if(array_key_exists($path, $this->file_cache))
+		{
+			return($this->file_cache[$path]);
+		}
+
 		$select_query = "select * from files where filename='" . $this->db->escape_string(basename($path)) . "';";
 		$insert_query = "insert into files (filename, size, filetime) values ('" . $this->db->escape_string(basename($path)) . "', '" . filesize($path) . "', '" . gmdate("Y-m-d H:i:s", filemtime($path)) . "');";
 		$ret = array();
@@ -55,6 +62,8 @@ class LogDB
 				$ret = $row;
 			}
 		}
+
+		$this->file_cache[$path] = $ret;
 		return($ret);
 	}
 
@@ -84,7 +93,12 @@ class LogDB
 
 	function getPath($path)
 	{
-		$ext = preg_replace("|^(.+)/([^/\\.]+)\\.([^/]+)$|", "$3", $path);
+		if(strlen(stristr($path, "?")) > 0)
+		{
+			$ext = preg_replace("|^([^\\?]+)/([^/\\?]+)\\.([^/\\.\\?]+)\\?(.*)$|", "$3", $path);
+		} else {
+			$ext = preg_replace("|^(.+)/([^/]+)\\.([^/\\.]+)$|", "$3", $path);
+		}
 		if(strcmp($ext, $path) == 0) { $ext = ""; }
 		$select_query = "select * from paths where path='" . $this->db->escape_string($path) . "';";
 		$insert_query = "insert into paths (path, ext) values ('" . $this->db->escape_string($path) . "', '" . $this->db->escape_string($ext) . "');";
