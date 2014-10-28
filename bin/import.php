@@ -47,6 +47,7 @@ foreach($files as $file)
 	{
 		continue;
 	}
+	print($file . "\n");
 	$fp = fopen($file, "r");
 	while($row = fgets($fp, 4096))
 	{
