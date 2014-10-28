@@ -1,0 +1,7 @@
+{
+	"host":"localhost",
+	"database":"logs",
+	"username":"",
+	"password":"",
+	"port":3306
+}

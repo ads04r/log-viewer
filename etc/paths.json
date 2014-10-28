@@ -1,0 +1,4 @@
+{
+	"logs":"/var/log/apache2",
+	"htdocs":"/var/www"
+}
